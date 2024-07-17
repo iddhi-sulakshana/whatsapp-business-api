@@ -146,14 +146,23 @@ export async function updateOrderPaid(
     const page: Page = (await browser.pages())[0];
     try {
         const isChatOpened: boolean = await openChat(phoneNumber);
-        if (!isChatOpened) return false;
+        if (!isChatOpened) {
+            logger.info("Chat not opened");
+            return false;
+        }
 
         const isFound: boolean = await openOrder(orderId);
-        if (!isFound) return false;
+        if (!isFound) {
+            logger.info("Order not found");
+            return false;
+        }
 
         const paidStatus = await page.$(reusables.ORDER_STATUS);
 
-        if (paidStatus === null) return false;
+        if (paidStatus === null) {
+            logger.info("Paid status not found");
+            return false;
+        }
 
         // check if paidstatus div aria-clicked attribute is false
         const isPaid = await paidStatus.evaluate((element): boolean => {
