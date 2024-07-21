@@ -1,0 +1,20 @@
+{
+    "name": "whatsapp-business-api",
+    "version": "1.0.0",
+    "author": "Iddhi Dasanayaka",
+    "module": "index.ts",
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "description": "WhatsApp Business API",
+    "scripts": {
+        "start": "bun run dist/index.js",
+        "build": "bun build index.ts --outdir dist",
+        "dev": "bun --hot run index.ts",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "type": "module"
+}
