@@ -15,6 +15,6 @@ export default () => {
     if (vars.mongo.uri) {
         mongoose
             .connect(vars.mongo.uri)
-            .then(() => logger.info("MongoDB connected..."));
+            .then(() => logger.info("MongoDB connected!!!"));
     }
 };

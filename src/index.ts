@@ -1,7 +1,14 @@
-import vars from "./config/vars";
-import logger from "./config/logger";
-import app from "./config/express";
-import mongoose from "./config/mongoose";
+import vars from "./api/config/vars";
+import logger from "./api/config/logger";
+import app from "./app/app";
+import server from "./api/config/server";
+import mongoose from "./api/config/database";
 
+// initialize the mongodb connection
 mongoose();
-app.listen(vars.port, () => logger.info(`Server started on port ${vars.port}`));
+
+// start the whatsapp application
+app.init();
+
+// start the API server
+server.init();
