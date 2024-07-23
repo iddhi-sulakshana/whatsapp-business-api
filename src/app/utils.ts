@@ -5,6 +5,8 @@ const reusables = {
     INTRO_QR_LANDING_SELECTOR: "div.landing-wrapper",
     INTRO_CHAT_SEARCH_SELECTOR: "[data-icon='search']",
     QRCODE_SELECTOR: "div[data-ref]",
+    QR_RETRY_BUTTON: "div[data-ref] > span > button",
+    AUTHENTICATED_SELECTOR: "div._aly_",
 };
 
 export async function clearCache() {

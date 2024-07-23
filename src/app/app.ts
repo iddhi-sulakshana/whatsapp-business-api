@@ -1,8 +1,7 @@
-import { Browser, Page } from "puppeteer";
+import { Page } from "puppeteer";
 import logger from "../api/config/logger";
-import { initBrowser, initPage, isAuthorized } from "./browser";
+import { initBrowser, initPage, isAuthorized, loadChats } from "./browser";
 
-var browser: Browser;
 var mainPage: Page | null;
 
 export default {
@@ -19,5 +18,7 @@ export default {
         logger.info("WhatsaApp Page Loaded ");
 
         await isAuthorized();
+
+        await loadChats();
     },
 };

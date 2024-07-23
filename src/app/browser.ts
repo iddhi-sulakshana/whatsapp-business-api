@@ -2,6 +2,9 @@ import puppeteer, { Browser, Page } from "puppeteer";
 import reusables from "./utils";
 import variables from "../api/config/vars";
 import logger from "../api/config/logger";
+import qr_terminal from "qrcode-terminal";
+
+declare const window: any;
 
 export var browser: Browser;
 
@@ -87,5 +90,112 @@ export async function isAuthorized(): Promise<Boolean> {
     }
     logger.info("User needs to authenticate using QR code");
     global.isLogged = false;
+    if (global.isOnline) await authenticateQR();
     return false;
+}
+
+export async function emitQR(): Promise<void> {
+    const page: Page = (await browser.pages())[0];
+    await page.waitForSelector(reusables.QRCODE_SELECTOR);
+    const qrCodeValue: string | null = await page.evaluate(
+        (selector) => {
+            const dataRef = document.querySelector(selector.QRCODE_SELECTOR);
+            const dataAttr = dataRef?.getAttribute("data-ref");
+            if (dataAttr) return dataAttr;
+            return null;
+        },
+        { ...reusables }
+    );
+
+    if (qrCodeValue === null) return;
+
+    logger.info(
+        ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"
+    );
+    qr_terminal.generate(qrCodeValue, { small: true });
+    logger.info(
+        "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
+    );
+
+    // TODO: emit the qr code value to event
+}
+
+export async function authenticateQR(): Promise<void> {
+    logger.info("Initializing QR code listener...");
+    const page: Page = (await browser.pages())[0];
+    await page.waitForSelector(reusables.QRCODE_SELECTOR);
+
+    page.exposeFunction("emitQR", emitQR);
+
+    await page.evaluate(
+        (selectors) => {
+            const qr_container: HTMLElement | null = document.querySelector(
+                selectors.QRCODE_SELECTOR
+            );
+
+            emitQR();
+
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    // listens to changes in the qr token
+                    if (
+                        mutation.type === "attributes" &&
+                        mutation.attributeName === "data-ref"
+                    ) {
+                        window.emitQR();
+                    } else if (mutation.type === "childList") {
+                        const retry_button: HTMLElement | null =
+                            document.querySelector(selectors.QR_RETRY_BUTTON);
+                        if (retry_button) retry_button.click();
+                        window.emitQR();
+                    }
+                });
+            });
+
+            if (qr_container === null) return;
+
+            observer.observe(qr_container.parentElement!, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ["data-ref"],
+            });
+        },
+        { ...reusables }
+    );
+
+    await getAuthenticated();
+}
+
+export async function getAuthenticated(): Promise<boolean> {
+    const page: Page = (await browser.pages())[0];
+
+    logger.info("Waiting for get authenticated");
+
+    // await for selector div that has '_aly_' class
+    try {
+        await page.waitForSelector(reusables.AUTHENTICATED_SELECTOR, {
+            timeout: 0,
+        });
+        logger.info("Authenticated loginning in");
+        return true;
+    } catch {
+        return await getAuthenticated();
+    }
+}
+
+export async function loadChats(): Promise<boolean> {
+    const page: Page = (await browser.pages())[0];
+
+    try {
+        await page.waitForSelector(reusables.INTRO_CHAT_SEARCH_SELECTOR, {
+            timeout: 0,
+        });
+
+        logger.info("Authenticated and loaded the chat");
+
+        return true;
+    } catch {
+        return await loadChats();
+    }
 }
