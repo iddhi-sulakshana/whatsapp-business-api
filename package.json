@@ -9,7 +9,7 @@
     "scripts": {
         "start": "bun run dist/index.js",
         "build": "tsc && tsc-alias",
-        "dev": "tsc-watch --onSuccess \"bun run dist/index.js .\""
+        "dev": "tsc-watch --onFirstSuccess \"bun run --watch dist/index.js\""
     },
     "devDependencies": {
         "@types/bluebird": "^3.5.42",
@@ -33,6 +33,7 @@
         "helmet": "^7.1.0",
         "mongoose": "^8.5.1",
         "morgan": "^1.10.0",
+        "puppeteer": "^22.13.1",
         "winston": "^3.13.1"
     }
 }

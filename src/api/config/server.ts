@@ -7,6 +7,7 @@ import error from "../middlewares/error";
 import { env } from "bun";
 import logger from "./logger";
 import serverDetails from "../utils/serverDetails";
+import routes from "../routes";
 
 const server = express();
 
@@ -18,7 +19,8 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 server.use(error);
 
-// mount api route paths
+// mount api route path
+routes(server);
 
 export default {
     init: (): void => {

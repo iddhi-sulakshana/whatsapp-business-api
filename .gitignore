@@ -11,6 +11,19 @@ lerna-debug.log*
 .pnpm-debug.log*
 bun.lockb
 
+# basic ignores for node application
+node_modules
+npm-debug.log
+.DS_Store
+.env
+
+web_cache
+package-lock.json
+yarn.lock
+.vscode
+bun.lockb
+temp
+
 # Caches
 
 .cache

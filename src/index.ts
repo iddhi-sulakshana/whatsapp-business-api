@@ -5,10 +5,10 @@ import server from "./api/config/server";
 import mongoose from "./api/config/database";
 
 // initialize the mongodb connection
-mongoose();
+// mongoose();
 
 // start the whatsapp application
 app.init();
 
 // start the API server
-server.init();
+// server.init
