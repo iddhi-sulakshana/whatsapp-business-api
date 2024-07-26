@@ -18,6 +18,7 @@ npm-debug.log
 .env
 
 web_cache
+web_cache*
 package-lock.json
 yarn.lock
 .vscode

@@ -3,6 +3,7 @@ import reusables from "./utils";
 import variables from "../api/config/vars";
 import logger from "../api/config/logger";
 import qr_terminal from "qrcode-terminal";
+import authenticateEmitter from "../events/AuthenticateEmitter";
 
 declare const window: any;
 
@@ -62,8 +63,10 @@ export async function isPageLoaded(page: Page): Promise<Boolean> {
 
     if (isLoaded) {
         global.isOnline = true;
+        authenticateEmitter.emit("change_online");
         return true;
     }
+    authenticateEmitter.emit("change_online");
     global.isOnline = false;
     return false;
 }
@@ -117,7 +120,7 @@ export async function emitQR(): Promise<void> {
         "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     );
 
-    // TODO: emit the qr code value to event
+    authenticateEmitter.emit("new_qr", qrCodeValue);
 }
 
 export async function authenticateQR(): Promise<void> {

@@ -1,6 +1,6 @@
-import winston from "winston";
+import winston, { Logger } from "winston";
 
-const logger: any = winston.createLogger({
+const logger: Logger = winston.createLogger({
     level: "info",
     format: winston.format.json(),
     transports: [
@@ -19,13 +19,5 @@ if (process.env.NODE_ENV !== "production") {
         })
     );
 }
-
-logger.stream = () => {
-    return {
-        write: (message: string) => {
-            logger.info(message.trim());
-        },
-    };
-};
 
 export default logger;

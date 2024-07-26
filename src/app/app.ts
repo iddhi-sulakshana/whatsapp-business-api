@@ -2,18 +2,18 @@ import { Page } from "puppeteer";
 import logger from "../api/config/logger";
 import { initBrowser, initPage, isAuthorized, loadChats } from "./browser";
 
-var mainPage: Page | null;
-
 export default {
     init: async function (): Promise<void> {
         logger.info("App is being initialized...");
         await initBrowser();
         logger.info("Browser initialized!!!");
 
-        await initPage();
+        var mainPage = await initPage();
 
-        if (mainPage === null)
-            return logger.error("Error Loading WhatsaApp page");
+        if (mainPage === null) {
+            logger.error("Error Loading WhatsaApp page");
+            return;
+        }
 
         logger.info("WhatsaApp Page Loaded ");
 

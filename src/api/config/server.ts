@@ -4,23 +4,28 @@ import cors from "cors";
 import helmet from "helmet";
 import vars from "./vars";
 import error from "../middlewares/error";
-import { env } from "bun";
 import logger from "./logger";
 import serverDetails from "../utils/serverDetails";
 import routes from "../routes";
+import bodyParser from "body-parser";
+import { Server } from "http";
+import sockets from "../sockets";
 
-const server = express();
+const app = express();
 
-server.use(morgan(vars.logs));
+app.use(morgan(vars.logs));
 
-server.use(cors());
-server.use(helmet());
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
-server.use(error);
+app.use(cors());
+app.use(helmet());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(error);
 
 // mount api route path
-routes(server);
+routes(app);
+
+// gets server from the socket
+const server: Server = sockets(app);
 
 export default {
     init: (): void => {

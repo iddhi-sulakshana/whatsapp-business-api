@@ -5,4 +5,7 @@ declare global {
     var isOnline: boolean;
 }
 
+global.isLogged = false;
+global.isOnline = false;
+
 export {}; // to avoid the error "Cannot redeclare block-scoped variable 'isLogged'." and "Cannot redeclare block-scoped variable 'isOnline'."
