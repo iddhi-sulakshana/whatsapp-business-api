@@ -8,12 +8,12 @@ export default function authenticationSocket(io: Server): void {
         logger.info("Socket client connected for authentication");
 
         socket.emit("change_online", global.isOnline || false);
-        socket.emit("change_auth", global.isLogged || false);
+        socket.emit("change_logged", global.isLogged || false);
 
         // Send new QR code to the client
-        authenticateEmitter.on("new_qr", (qrCodeValue: string) => {
+        authenticateEmitter.on("change_qr", (qrCodeValue: string) => {
             logger.info("Emitting QR Code:", qrCodeValue);
-            socket.emit("new_qr", qrCodeValue);
+            socket.emit("change_qr", qrCodeValue);
         });
 
         // Send online status to the client
@@ -22,8 +22,8 @@ export default function authenticationSocket(io: Server): void {
         });
 
         // Send Logged in status to the client
-        authenticateEmitter.on("change_auth", () => {
-            socket.emit("change_auth", global.isLogged || false);
+        authenticateEmitter.on("change_logged", () => {
+            socket.emit("change_logged", global.isLogged || false);
         });
 
         socket.on("disconnect", () => {

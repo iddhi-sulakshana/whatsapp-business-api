@@ -9,6 +9,7 @@ declare const window: any;
 
 export var browser: Browser;
 
+// initialize the browser window
 export async function initBrowser(): Promise<void> {
     browser = await puppeteer.launch({
         headless: variables.env === "production",
@@ -16,6 +17,7 @@ export async function initBrowser(): Promise<void> {
     });
 }
 
+// initializing Whatsapp Web Page
 export async function initPage(): Promise<Page | null> {
     logger.info("Initializing Main Page...");
     const mainPage: Page = (await browser.pages())[0];
@@ -32,6 +34,7 @@ export async function initPage(): Promise<Page | null> {
     }
 }
 
+// Reload the page if page isnt loaded
 export async function reloadPage(retries: number = 0): Promise<Page | null> {
     if (retries >= 3) return null;
     logger.info("Refreshing for " + (retries + 1) + " time...");
@@ -47,6 +50,7 @@ export async function reloadPage(retries: number = 0): Promise<Page | null> {
     }
 }
 
+// check page load status
 export async function isPageLoaded(page: Page): Promise<Boolean> {
     const isLoaded = await Promise.race([
         new Promise((resolve) => {
@@ -62,15 +66,14 @@ export async function isPageLoaded(page: Page): Promise<Boolean> {
     ]);
 
     if (isLoaded) {
-        global.isOnline = true;
-        authenticateEmitter.emit("change_online");
+        emitOnline(true);
         return true;
     }
-    authenticateEmitter.emit("change_online");
-    global.isOnline = false;
+    emitOnline(false);
     return false;
 }
 
+// Check is QR scanned and authorized
 export async function isAuthorized(): Promise<Boolean> {
     const page: Page = (await browser.pages())[0];
     const isAuthorized = await Promise.race([
@@ -88,15 +91,16 @@ export async function isAuthorized(): Promise<Boolean> {
 
     if (isAuthorized) {
         logger.info("User is logged in");
-        global.isLogged = true;
+        emitLogged(true);
         return true;
     }
     logger.info("User needs to authenticate using QR code");
-    global.isLogged = false;
+    emitLogged(false);
     if (global.isOnline) await authenticateQR();
     return false;
 }
 
+// Get the QR code and emit the event to send QR code to the client
 export async function emitQR(): Promise<void> {
     const page: Page = (await browser.pages())[0];
     await page.waitForSelector(reusables.QRCODE_SELECTOR);
@@ -120,9 +124,10 @@ export async function emitQR(): Promise<void> {
         "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<"
     );
 
-    authenticateEmitter.emit("new_qr", qrCodeValue);
+    authenticateEmitter.emit("change_qr", qrCodeValue);
 }
 
+// QR code listener for change of QR code and reflect it
 export async function authenticateQR(): Promise<void> {
     logger.info("Initializing QR code listener...");
     const page: Page = (await browser.pages())[0];
@@ -170,6 +175,7 @@ export async function authenticateQR(): Promise<void> {
     await getAuthenticated();
 }
 
+// checking if authetication is happening
 export async function getAuthenticated(): Promise<boolean> {
     const page: Page = (await browser.pages())[0];
 
@@ -187,6 +193,7 @@ export async function getAuthenticated(): Promise<boolean> {
     }
 }
 
+// Check if chats are loaded successfully
 export async function loadChats(): Promise<boolean> {
     const page: Page = (await browser.pages())[0];
 
@@ -197,8 +204,89 @@ export async function loadChats(): Promise<boolean> {
 
         logger.info("Authenticated and loaded the chat");
 
+        await retryListener();
+
         return true;
     } catch {
         return await loadChats();
     }
+}
+
+// click on the retry connection button
+export async function retryConnection(): Promise<void> {
+    const page: Page = (await browser.pages())[0];
+    try {
+        const notificationContainer = await page.waitForSelector(
+            reusables.NOTIFICATION_CONTAINER_SELECTOR,
+            { timeout: 500 }
+        );
+        // check if notification controller has retry connection span
+        if (!notificationContainer) throw Error("Is online");
+        const reconnectSpan = await notificationContainer.waitForSelector(
+            reusables.ALERT_ICON,
+            { timeout: 500 }
+        );
+        if (reconnectSpan) emitOnline(false);
+        else throw Error("Is online");
+    } catch {
+        emitOnline(true);
+    }
+}
+
+// check if offline message is displayed on the page
+export async function retryListener(): Promise<void> {
+    logger.info("Initializing Retry Connection listener...");
+
+    const page: Page = (await browser.pages())[0];
+
+    page.exposeFunction("retryConnection", retryConnection);
+
+    await page.evaluate(
+        (selectors) => {
+            const notificationContainer = document.querySelector(
+                selectors.NOTIFICATION_CONTAINER_SELECTOR
+            );
+
+            const notificationController = (mutation: MutationRecord): void => {
+                window.retryConnection();
+                let reconnectSpan: HTMLElement | null;
+                reconnectSpan = (mutation.target as HTMLElement).querySelector(
+                    selectors.RECONNECT_SPAN_SELECTOR
+                );
+                if (!reconnectSpan) {
+                    mutation.addedNodes.forEach((addedNode) => {
+                        reconnectSpan = (
+                            addedNode as HTMLElement
+                        ).querySelector(selectors.RECONNECT_SPAN_SELECTOR);
+                    });
+                }
+                const reconnectBtn = reconnectSpan?.querySelector("button");
+                if (!reconnectBtn) return;
+                reconnectBtn.click();
+            };
+
+            const notificationObserver = new MutationObserver((mutations) => {
+                mutations.forEach(notificationController);
+            });
+
+            notificationObserver.observe(notificationContainer!, {
+                subtree: true,
+                childList: true,
+            });
+        },
+        { ...reusables }
+    );
+}
+
+// Emitters
+function emitOnline(onlineStatus: boolean): void {
+    logger.info("Emitting online status: " + onlineStatus);
+    global.isOnline = onlineStatus;
+    authenticateEmitter.emit("change_online");
+}
+
+function emitLogged(authenticatedStatus: boolean): void {
+    logger.info("Emitting Logged status: " + authenticatedStatus);
+    global.isLogged = authenticatedStatus;
+    authenticateEmitter.emit("change_logged");
 }
