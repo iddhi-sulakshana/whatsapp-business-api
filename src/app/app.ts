@@ -1,6 +1,7 @@
 import { Page } from "puppeteer";
 import logger from "../api/config/logger";
 import { initBrowser, initPage, isAuthorized, loadChats } from "./browser";
+import { openChat } from "./interface";
 
 export default {
     init: async function (): Promise<void> {
@@ -20,5 +21,7 @@ export default {
         await isAuthorized();
 
         await loadChats();
+
+        await openChat("+94716666681");
     },
 };

@@ -143,10 +143,10 @@ async function openChat(mainPage, phoneNumber) {
         // // press enter
         await mainPage.keyboard.press("Enter");
 
-        // // Wait for the chat to open
-        // // wait for div that has Type a message text
+        // Wait for the chat to open
+        // wait for div that has Type a message text
         await mainPage.waitForSelector(
-            "div.x10l6tqk.x13vifvy.x1ey2m1c.x1r1tlb4.xhtitgo.x1grh1yo.x47corl.x87ps6o.xh9ts4v.x1k6rcq7.x6prxxf"
+            "div.x10l6tqk.x13vifvy.x17qophe.xh8yej3.x5yr21d.x182nak8.x1wwuglj.x1vs56c6"
         );
 
         await mainPage.type(
