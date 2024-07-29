@@ -21,6 +21,21 @@ const reusables = {
     PHONE_NOT_FOUND: "div.x12lqup9.x1o1kx08",
     PHONE_NOT_FOUND_BUTTON:
         "button.x889kno.x1a8lsjc.xbbxn1n.xxbr6pl.x1n2onr6.x1rg5ohu.xk50ysn.x1f6kntn.xyesn5m.x1z11no5.xjy5m1g.x1mnwbp6.x4pb5v6.x178xt8z.xm81vs4.xso031l.xy80clv.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x1v8p93f.xogb00i.x16stqrj.x1ftr3km.x1hl8ikr.xfagghw.x9dyr19.x9lcvmn.xbtce8p.x14v0smp.xo8ufso.xcjl5na.x1k3x3db.xuxw1ft.xv52azi",
+    ORDER_STATUS:
+        "div.x3nfvp2.xl56j7k.x6s0dn4.x1td3qas.x1qx5ct2.x7r5mf7.xeyog9w.xahult9.x1w4ip6v.x1n2onr6.x1ypdohk",
+    ORDER_PAID_BUTTON:
+        "input.x10l6tqk.x1i1rx1s.xjm9jq1.x6ikm8r.x10wlt62.xeh89do.x1hyvwdk.xuxw1ft",
+    ORDER_SAVE_BUTTON:
+        "button.x889kno.x1a8lsjc.xbbxn1n.xxbr6pl.x1n2onr6.x1rg5ohu.xk50ysn.x1f6kntn.xyesn5m.x1z11no5.xjy5m1g.x1mnwbp6.x4pb5v6.x178xt8z.xm81vs4.xso031l.xy80clv.x13fuv20.xu3j5b3.x1q0q8m5.x26u7qi.x1v8p93f.xogb00i.x16stqrj.x1ftr3km.x1hl8ikr.xfagghw.x9dyr19.x9lcvmn.xbtce8p.x14v0smp.xo8ufso.xcjl5na.x1k3x3db.xuxw1ft.xv52azi",
+    ATTATCH_BUTTON:
+        "div[title='Attach']._ajv6.x1y1aw1k.x1sxyh0.xwib8y2.xurb0ha",
+    CREATE_ORDER_BUTTON:
+        "span.xdod15v.xzwifym.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft",
+    ORDER_PAGE_TITLE: "h1.x1qlqyl8.x1pd3egz.xcgk4ki",
+    MESSAGE_CONTAINER: "div.x3psx0u.xwib8y2.xkhd6sd.xrmvbpv",
+    ORDER_TITLE: "div.x190qgfh.xk50ysn.x40yjcy.xtvhhri.xkffqfj.x1dbl2gt",
+    ADD_NEW_ITEM_BUTTON: "div._ak72._ak73._ak7k",
+    ADD_ITEM_INPUTS: "div.x1hx0egp.x6ikm8r.x1odjw0f.x1k6rcq7.x1nxh6w3",
 };
 
 export async function clearCache() {

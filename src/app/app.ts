@@ -1,7 +1,6 @@
-import { Page } from "puppeteer";
 import logger from "../api/config/logger";
 import { initBrowser, initPage, isAuthorized, loadChats } from "./browser";
-import { openChat } from "./interface";
+import { createOrder } from "./interface";
 
 export default {
     init: async function (): Promise<void> {
@@ -22,6 +21,9 @@ export default {
 
         await loadChats();
 
-        await openChat("+94716666681");
+        await createOrder("+94781940178", [
+            { name: "Item 1", price: "100", quantity: "1" },
+            { name: "Item 2", price: "200", quantity: "2" },
+        ]);
     },
 };
