@@ -5,7 +5,7 @@ import { healthCheck } from "../middlewares/applicationChecl";
 
 const router = Router();
 
-router.post("/", healthCheck, (req, res) => {
+router.post("/", healthCheck, async (req, res) => {
     // create a new order
     const phoneNumber: string = req.body.phoneNumber;
     const orderList: OrderItem[] = req.body.orderList;
@@ -32,7 +32,7 @@ router.post("/", healthCheck, (req, res) => {
     }
 
     // create the order
-    const orderId = createOrder(phoneNumber, orderList);
+    const orderId = await createOrder(phoneNumber, orderList);
 
     if (!orderId) {
         return res.status(500).json({ message: "Failed to create order" });

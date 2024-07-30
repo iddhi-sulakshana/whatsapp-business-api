@@ -15,8 +15,7 @@ export async function initBrowser(repeats: number = 0): Promise<boolean> {
     try {
         browser = await puppeteer.launch({
             headless: variables.env === "production",
-            executablePath: "/bin/brave-browser",
-            // userDataDir: "./web_cache",
+            userDataDir: "./web_cache",
             args: [
                 "--no-sandbox",
                 "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36",
