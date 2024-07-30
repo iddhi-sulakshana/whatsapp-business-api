@@ -1,5 +1,5 @@
 import puppeteer, { Browser, Page } from "puppeteer";
-import reusables from "./utils";
+import reusables, { closeBrowser } from "./utils";
 import variables from "../api/config/vars";
 import logger from "../api/config/logger";
 import qr_terminal from "qrcode-terminal";
@@ -10,11 +10,24 @@ declare const window: any;
 export var browser: Browser;
 
 // initialize the browser window
-export async function initBrowser(): Promise<void> {
-    browser = await puppeteer.launch({
-        headless: variables.env === "production",
-        userDataDir: "./web_cache",
-    });
+export async function initBrowser(repeats: number = 0): Promise<boolean> {
+    if (repeats >= 3) return false;
+    try {
+        browser = await puppeteer.launch({
+            headless: variables.env === "production",
+            executablePath: "/bin/brave-browser",
+            // userDataDir: "./web_cache",
+            args: [
+                "--no-sandbox",
+                "--user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.105 Safari/537.36",
+            ],
+        });
+        return true;
+    } catch (error) {
+        logger.error("Error occured during browser initialization");
+        await closeBrowser();
+        return initBrowser(repeats + 1);
+    }
 }
 
 // initializing Whatsapp Web Page
@@ -131,46 +144,58 @@ export async function emitQR(): Promise<void> {
 export async function authenticateQR(): Promise<void> {
     logger.info("Initializing QR code listener...");
     const page: Page = (await browser.pages())[0];
-    await page.waitForSelector(reusables.QRCODE_SELECTOR);
+    try {
+        await page.waitForSelector(reusables.QRCODE_SELECTOR, {
+            timeout: 5000,
+        });
+        page.exposeFunction("emitQR", emitQR);
 
-    page.exposeFunction("emitQR", emitQR);
+        await page.evaluate(
+            (selectors) => {
+                const qr_container: HTMLElement | null = document.querySelector(
+                    selectors.QRCODE_SELECTOR
+                );
 
-    await page.evaluate(
-        (selectors) => {
-            const qr_container: HTMLElement | null = document.querySelector(
-                selectors.QRCODE_SELECTOR
-            );
+                emitQR();
 
-            emitQR();
-
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    // listens to changes in the qr token
-                    if (
-                        mutation.type === "attributes" &&
-                        mutation.attributeName === "data-ref"
-                    ) {
-                        window.emitQR();
-                    } else if (mutation.type === "childList") {
-                        const retry_button: HTMLElement | null =
-                            document.querySelector(selectors.QR_RETRY_BUTTON);
-                        if (retry_button) retry_button.click();
-                        window.emitQR();
-                    }
+                const observer = new MutationObserver((mutations) => {
+                    mutations.forEach((mutation) => {
+                        // listens to changes in the qr token
+                        if (
+                            mutation.type === "attributes" &&
+                            mutation.attributeName === "data-ref"
+                        ) {
+                            window.emitQR();
+                        } else if (mutation.type === "childList") {
+                            const retry_button: HTMLElement | null =
+                                document.querySelector(
+                                    selectors.QR_RETRY_BUTTON
+                                );
+                            if (retry_button) retry_button.click();
+                            window.emitQR();
+                        }
+                    });
                 });
-            });
 
-            if (qr_container === null) return;
+                if (qr_container === null) return;
 
-            observer.observe(qr_container.parentElement!, {
-                subtree: true,
-                childList: true,
-                attributes: true,
-                attributeFilter: ["data-ref"],
-            });
-        },
-        { ...reusables }
-    );
+                observer.observe(qr_container.parentElement!, {
+                    subtree: true,
+                    childList: true,
+                    attributes: true,
+                    attributeFilter: ["data-ref"],
+                });
+            },
+            { ...reusables }
+        );
+    } catch {
+        await page.screenshot({
+            path: "./logs/screenshots/qr_error.png",
+            type: "png",
+        });
+        logger.info("QR code not found");
+        await authenticateQR();
+    }
 
     await getAuthenticated();
 }
@@ -187,6 +212,8 @@ export async function getAuthenticated(): Promise<boolean> {
             timeout: 0,
         });
         logger.info("Authenticated loginning in");
+        const logged = await isAuthorized();
+        if (!logged) throw Error("Not logged in");
         return true;
     } catch {
         return await getAuthenticated();

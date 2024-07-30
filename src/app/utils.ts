@@ -1,4 +1,6 @@
 import fs from "fs";
+import shell from "shelljs";
+import logger from "../api/config/logger";
 
 const reusables = {
     WHATSAPP_URL: "https://web.whatsapp.com",
@@ -42,10 +44,16 @@ export async function clearCache() {
     // remove webcache folder if exists
     if (fs.existsSync("./web_cache")) {
         fs.rmSync("./web_cache", { recursive: true });
-        console.log("Cache cleared.");
+        logger.info("Cache cleared");
     } else {
-        console.log("No cache found.");
+        logger.info("No cache found");
     }
+}
+
+export async function closeBrowser() {
+    shell.exec("pkill chrome");
+    logger.info("Browser closed");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 }
 
 export default reusables;

@@ -17,6 +17,7 @@ export async function openChat(phoneNumber: string): Promise<boolean> {
     // or
 
     try {
+        await page.type(reusables.SEARCH_BAR, "(You)");
         // Click on escape button if chat was open
         await page.keyboard.down("Escape");
         // Select the search bar and type type the current user name
