@@ -36,6 +36,8 @@ const reusables = {
     ORDER_PAGE_TITLE: "h1.x1qlqyl8.x1pd3egz.xcgk4ki",
     MESSAGE_CONTAINER: "div.x3psx0u.xwib8y2.xkhd6sd.xrmvbpv",
     ORDER_TITLE: "div.x190qgfh.xk50ysn.x40yjcy.xtvhhri.xkffqfj.x1dbl2gt",
+    ORDER_CONTAINER:
+        "div.x1c4vz4f.xs83m0k.xdl72j9.x1g77sc7.x78zum5.xozqiw3.x1oa3qoh.x12fk4p8.xeuugli.x2lwn1j.x1nhvcw1.xdt5ytf.x1qjc9v5.x1o095ql.x193iq5w",
     ADD_NEW_ITEM_BUTTON: "div._ak72._ak73._ak7k",
     ADD_ITEM_INPUTS: "div.x1hx0egp.x6ikm8r.x1odjw0f.x1k6rcq7.x1nxh6w3",
 };

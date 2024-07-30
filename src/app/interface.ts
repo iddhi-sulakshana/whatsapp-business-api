@@ -43,7 +43,7 @@ export async function openChat(phoneNumber: string): Promise<boolean> {
             phoneNumber,
             reusables.CHAT_URL
         );
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         const notFound = await page.evaluate(
             (PHONE_NOT_FOUND, PHONE_NOT_FOUND_BUTTON): boolean => {
                 const notFound = document.querySelector(PHONE_NOT_FOUND);
@@ -52,6 +52,8 @@ export async function openChat(phoneNumber: string): Promise<boolean> {
                     const button: HTMLElement | null = document.querySelector(
                         PHONE_NOT_FOUND_BUTTON
                     );
+
+                    if (button === null) return false;
 
                     button!.click();
                     return true;
@@ -79,50 +81,60 @@ export async function openOrder(orderId: string): Promise<boolean> {
     const page: Page = (await browser.pages())[0];
 
     try {
-        const notFound = await page.evaluate((orderNo: string): boolean => {
-            const ordersList: NodeListOf<HTMLElement> | null =
-                document.querySelectorAll(reusables.ORDER_TITLE);
+        const notFound = await page.evaluate(
+            (
+                orderNo: string,
+                ORDER_TITLE: string,
+                ORDER_CONTAINER: string
+            ): boolean => {
+                const ordersList: NodeListOf<HTMLElement> | null =
+                    document.querySelectorAll(ORDER_TITLE);
 
-            let orderTitle: HTMLElement | null = null;
+                let orderTitle: HTMLElement | null = null;
+                console.log(ordersList);
+                ordersList.forEach((order) => {
+                    if (order.innerText.includes("ORDER #" + orderNo)) {
+                        orderTitle = order;
+                    }
+                });
 
-            ordersList.forEach((order) => {
-                if (order.innerText.includes("ORDER #" + orderNo)) {
-                    orderTitle = order;
-                }
-            });
+                if (orderTitle === null) return true;
 
-            if (orderTitle === null) return true;
+                const parentOrder: HTMLElement | null = (
+                    orderTitle as HTMLElement
+                ).closest(ORDER_CONTAINER);
 
-            const parentOrder: HTMLElement | null = (
-                orderTitle as HTMLElement
-            ).closest(
-                "div.x1c4vz4f.xs83m0k.xdl72j9.x1g77sc7.x78zum5.xozqiw3.x1oa3qoh.x12fk4p8.xeuugli.x2lwn1j.x1nhvcw1.xdt5ytf.x1qjc9v5.x1o095ql.x193iq5w"
-            );
+                if (parentOrder === null) return true;
 
-            if (parentOrder === null) return true;
+                const orderButton: HTMLElement | null =
+                    parentOrder.querySelector("button[title='Update status']");
 
-            const orderButton: HTMLElement | null = parentOrder.querySelector(
-                "button[title='Update status']"
-            );
+                if (orderButton === null) return true;
 
-            if (orderButton === null) return true;
+                orderButton.click();
 
-            orderButton.click();
-
-            return false;
-        }, orderId);
+                return false;
+            },
+            orderId,
+            reusables.ORDER_TITLE,
+            reusables.ORDER_CONTAINER
+        );
 
         if (notFound) {
-            logger.info("Order not found!");
             return false;
         }
         await page.waitForSelector(reusables.ORDER_PAGE_TITLE);
-        await page.waitForFunction((): boolean | null => {
-            const element = document.querySelector(reusables.ORDER_PAGE_TITLE);
-            return (
-                element && element.textContent!.includes("Update order status")
-            );
-        });
+        await page.waitForFunction(
+            (ORDER_PAGE_TITLE: string): boolean | null => {
+                const element = document.querySelector(ORDER_PAGE_TITLE);
+                return (
+                    element &&
+                    element.textContent!.includes("Update order status")
+                );
+            },
+            {},
+            reusables.ORDER_PAGE_TITLE
+        );
     } catch {
         return false;
     }
@@ -130,10 +142,24 @@ export async function openOrder(orderId: string): Promise<boolean> {
     return true;
 }
 
-export async function updateOrderPaid(orderId: string): Promise<boolean> {
+/**
+ *
+ * @param phoneNumber phone number should be in the format +94xxxxxxxxx
+ * @param orderId order id should be the something like this without the #, 4PL8FREUWVK
+ * @returns returns the updated status of the order
+ */
+
+export async function updateOrderPaid(
+    phoneNumber: string,
+    orderId: string
+): Promise<boolean> {
     const page: Page = (await browser.pages())[0];
     try {
+        const isChatOpened: boolean = await openChat(phoneNumber);
+        if (!isChatOpened) return false;
+
         const isFound: boolean = await openOrder(orderId);
+        console.log(isFound);
         if (!isFound) return false;
 
         const paidStatus = await page.$(reusables.ORDER_STATUS);
@@ -152,13 +178,12 @@ export async function updateOrderPaid(orderId: string): Promise<boolean> {
 
         // Click on the paid switch
         await page.waitForSelector(reusables.ORDER_PAID_BUTTON);
-        await page.evaluate(() => {
-            const paidButton: HTMLElement | null = document.querySelector(
-                "input.x10l6tqk.x1i1rx1s.xjm9jq1.x6ikm8r.x10wlt62.xeh89do.x1hyvwdk.xuxw1ft"
-            );
+        await page.evaluate((ORDER_PAID_BUTTON: string) => {
+            const paidButton: HTMLElement | null =
+                document.querySelector(ORDER_PAID_BUTTON);
             if (paidButton === null) return;
             paidButton.click();
-        });
+        }, reusables.ORDER_PAID_BUTTON);
 
         await page.click(reusables.ORDER_SAVE_BUTTON);
 

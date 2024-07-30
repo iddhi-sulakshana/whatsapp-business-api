@@ -1,5 +1,6 @@
 import logger from "../api/config/logger";
 import { initBrowser, initPage, isAuthorized, loadChats } from "./browser";
+import { updateOrderPaid } from "./interface";
 
 export default {
     init: async function (): Promise<void> {
