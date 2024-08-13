@@ -72,7 +72,7 @@ export async function openChat(phoneNumber: string): Promise<boolean> {
 
         return true;
     } catch (error) {
-        logger.error(error);
+        logger.error("Error opening chat");
         return false;
     }
 }
@@ -91,7 +91,6 @@ export async function openOrder(orderId: string): Promise<boolean> {
                     document.querySelectorAll(ORDER_TITLE);
 
                 let orderTitle: HTMLElement | null = null;
-                console.log(ordersList);
                 ordersList.forEach((order) => {
                     if (order.innerText.includes("ORDER #" + orderNo)) {
                         orderTitle = order;
@@ -121,6 +120,7 @@ export async function openOrder(orderId: string): Promise<boolean> {
         );
 
         if (notFound) {
+            logger.info("Order not found!");
             return false;
         }
         await page.waitForSelector(reusables.ORDER_PAGE_TITLE);
@@ -136,6 +136,7 @@ export async function openOrder(orderId: string): Promise<boolean> {
             reusables.ORDER_PAGE_TITLE
         );
     } catch {
+        logger.error("Error opening order");
         return false;
     }
 
@@ -159,7 +160,6 @@ export async function updateOrderPaid(
         if (!isChatOpened) return false;
 
         const isFound: boolean = await openOrder(orderId);
-        console.log(isFound);
         if (!isFound) return false;
 
         const paidStatus = await page.$(reusables.ORDER_STATUS);
@@ -189,7 +189,7 @@ export async function updateOrderPaid(
 
         return true;
     } catch (error) {
-        logger.error(error);
+        logger.error("Error updating order status");
         return false;
     }
 }
@@ -218,16 +218,7 @@ export async function createOrder(
         }, reusables.CREATE_ORDER_BUTTON);
 
         // check if the correct window is opened
-        await page.waitForSelector(reusables.ORDER_PAGE_TITLE);
-        await page.waitForFunction(
-            (ORDER_PAGE_TITLE: string) => {
-                const element: HTMLElement | null =
-                    document.querySelector(ORDER_PAGE_TITLE);
-                return element && element.textContent!.includes("Create order");
-            },
-            {},
-            reusables.ORDER_PAGE_TITLE
-        );
+        await page.waitForSelector(reusables.CREATE_ORDER_TITLE);
 
         for (let i = 0; i < orderList.length; i++) {
             const orderItem = orderList[i];
@@ -237,7 +228,7 @@ export async function createOrder(
         // Click on the save button
         await page.click(reusables.ORDER_SAVE_BUTTON);
     } catch (error) {
-        logger.error(error);
+        logger.error("Error creating order");
         return null;
     }
     try {
@@ -248,12 +239,16 @@ export async function createOrder(
 
         if (messagesContainer === null) return null;
 
+        console.log("Messages container found");
+
         const orderID = await messagesContainer.evaluate(
             (element, ORDER_TITLE: string) => {
                 const ordersList: NodeListOf<HTMLElement> | null =
                     document.querySelectorAll(ORDER_TITLE);
+                console.log("here");
                 if (ordersList === null) return null;
                 if (ordersList.length === 0) return null;
+                console.log(orderList);
                 const lastOrder = ordersList[ordersList.length - 1];
                 return lastOrder.innerText;
             },
@@ -262,7 +257,7 @@ export async function createOrder(
 
         return orderID;
     } catch (error) {
-        logger.error(error);
+        logger.error("Error getting order id");
         return null;
     }
 }
@@ -273,18 +268,7 @@ export async function addOrderItem(orderItem: OrderItem): Promise<void> {
         // Click on the add item button
         await page.click(reusables.ADD_NEW_ITEM_BUTTON);
         // Wait for the item window to open
-        await page.waitForSelector(reusables.ORDER_PAGE_TITLE);
-        await page.waitForFunction(
-            (ORDER_PAGE_TITLE) => {
-                const element: HTMLElement | null =
-                    document.querySelector(ORDER_PAGE_TITLE);
-                return (
-                    element && element.textContent!.includes("Create new item")
-                );
-            },
-            {},
-            reusables.ORDER_PAGE_TITLE
-        );
+        await page.waitForSelector(reusables.CREATE_NEWITEM_TITLE);
 
         // input fields
         const inputs: ElementHandle<Element>[] | null = await page.$$(
@@ -303,6 +287,6 @@ export async function addOrderItem(orderItem: OrderItem): Promise<void> {
         await page.click(reusables.ORDER_SAVE_BUTTON);
         await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
-        logger.error(error);
+        logger.error("Error adding order item");
     }
 }
