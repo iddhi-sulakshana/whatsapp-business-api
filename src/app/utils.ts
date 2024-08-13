@@ -34,6 +34,7 @@ const reusables = {
         "span.xdod15v.xzwifym.x6ikm8r.x10wlt62.xlyipyv.xuxw1ft",
     CREATE_ORDER_TITLE: "div[title='Create order']",
     CREATE_NEWITEM_TITLE: "div[title='Create new item']",
+    UPDATE_ORDER_TITLE: "div[title='Update order status']",
     ORDER_PAGE_TITLE: "h1.x1qlqyl8.x1pd3egz.xcgk4ki",
     MESSAGE_CONTAINER: "div.x3psx0u.xwib8y2.xkhd6sd.xrmvbpv",
     ORDER_TITLE: "div.x190qgfh.xk50ysn.x40yjcy.xtvhhri.xkffqfj.x1dbl2gt",

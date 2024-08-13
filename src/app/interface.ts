@@ -123,18 +123,7 @@ export async function openOrder(orderId: string): Promise<boolean> {
             logger.info("Order not found!");
             return false;
         }
-        await page.waitForSelector(reusables.ORDER_PAGE_TITLE);
-        await page.waitForFunction(
-            (ORDER_PAGE_TITLE: string): boolean | null => {
-                const element = document.querySelector(ORDER_PAGE_TITLE);
-                return (
-                    element &&
-                    element.textContent!.includes("Update order status")
-                );
-            },
-            {},
-            reusables.ORDER_PAGE_TITLE
-        );
+        await page.waitForSelector(reusables.UPDATE_ORDER_TITLE);
     } catch {
         logger.error("Error opening order");
         return false;
@@ -239,22 +228,22 @@ export async function createOrder(
 
         if (messagesContainer === null) return null;
 
-        console.log("Messages container found");
+        // wait for 1 sec
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const orderID = await messagesContainer.evaluate(
-            (element, ORDER_TITLE: string) => {
-                const ordersList: NodeListOf<HTMLElement> | null =
-                    document.querySelectorAll(ORDER_TITLE);
-                console.log("here");
-                if (ordersList === null) return null;
-                if (ordersList.length === 0) return null;
-                console.log(orderList);
-                const lastOrder = ordersList[ordersList.length - 1];
-                return lastOrder.innerText;
-            },
-            reusables.ORDER_TITLE
+        const orderList: ElementHandle<Element>[] | null =
+            await messagesContainer.$$(reusables.ORDER_TITLE);
+
+        if (orderList === null) return null;
+        if (orderList.length === 0) return null;
+
+        const lastOrder = orderList[orderList.length - 1];
+
+        // @ts-ignore
+        const orderID: string = await lastOrder.evaluate(
+            // @ts-ignore
+            (element: HTMLElement | null): string | null => element!.innerText
         );
-
         return orderID;
     } catch (error) {
         logger.error("Error getting order id");
