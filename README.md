@@ -2,6 +2,12 @@
 
 This project provides an API that interacts with WhatsApp Web using Puppeteer, allowing you to create orders and mark them as paid. The server can be started using an npm script, which initializes Puppeteer, starts an HTTP server, and a WebSocket server for handling authentication and status updates.
 
+## 🚨 Important Note
+
+**The file located at `src/app/utils.ts` must be updated whenever WhatsApp introduces new tags or changes existing ones.**
+
+If you notice any discrepancies or updates required in this file, **please raise a pull request** to ensure the API continues to function correctly with WhatsApp's latest changes.
+
 ## Getting Started
 
 ### Prerequisites
