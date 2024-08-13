@@ -133,6 +133,19 @@ socket.onopen = function () {
 };
 ```
 
+## TODO
+
+-   [ ] Receive Incoming Messages
+-   [ ] Send Text Messages
+-   [ ] Receive Media (Images, Videos, Documents)
+-   [ ] Send Media (Images, Videos, Documents)
+-   [ ] Auto Reply to Messages
+-   [ ] Broadcast Messages
+-   [ ] Group Chat Management
+-   [ ] Message Template Management
+-   [ ] Webhook Support
+-   [ ] Docker compatibility
+
 ## Conclusion
 
 This API allows seamless interaction with WhatsApp Web through Puppeteer, making it easy to manage orders and automate business processes. Feel free to contribute or customize it according to your business needs.
